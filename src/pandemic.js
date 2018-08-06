@@ -15,17 +15,60 @@ export class Virus {
   getInfectRate(){
     return this.infectRate;
   }
+  getDeathRate(){
+    return this.deathRate;
+  }
+  getTravelRate(){
+    return this.travelRate;
+  }
 }
 
 export class Country {
-  constructor(countryName, totalPopulation, infectedPopulation, currentPopulation, growthRate, cureRate, virus = new Virus('none', 0,0,0)){
+  constructor(countryName, totalPopulation, infectedPopulation, currentPopulation, growthRate, cureRate, position = [], virus = new Virus('none', 0,0,0)){
     this.countryName = countryName;
     this.totalPopulation = totalPopulation;
-    this.infectedPopulation = totalPopulation;
+    this.infectedPopulation = infectedPopulation;
     this.currentPopulation = currentPopulation;
     this.growthRate = growthRate;
     this.cureRate = cureRate;
+    this.position = position;
     this.virus = virus;
+  }
+  // countryTick(){
+  //   this.totalPopIncrease();
+  //   if(infectedPopulation > 0){
+  //     this.infectedPopChange();
+  //     this.killPeople();
+  //   } else {
+  //
+  //   }
+  // }
+  static createMap(countries){
+    let map = [];
+    for(let i = 0; i < 3; i ++){
+      let tempRow = [];
+      for(let j = 0; j< 3; j ++){
+        countries[j + (3*i)].position = [i,j];
+        tempRow.push(countries[j + (3*i)]);
+      }
+    map.push(tempRow);
+    }
+    return map;
+  }
+  infectNeighbor(){
+    let neighbor = [[this.position[0] - 1, this.position[1]], [this.position[0] + 1, this.position[1]], [this.position[0], this.position[1] - 1], [this.position[0], this.position[1] + 1]];
+    let legalNeighbor = [];
+    for(let k = 0; k < 4; k++){
+      if(neighbor[k][0] >= 0 && neighbor[k][0] < 3 && neighbor[k][1] >= 0 && neighbor[k][1] < 3){
+        legalNeighbor.push(neighbor[k]);
+      }
+    }
+    return legalNeighbor;
+
+  }
+  infectedPopChange(){
+    this.infectedPopulation *= this.virus.getInfectRate();
+    this.infectedPopulation = Math.ceil(this.infectedPopulation);
   }
   totalPopIncrease(){
     this.totalPopulation *= 1.003;
@@ -34,6 +77,14 @@ export class Country {
   }
   infect(virus){
     this.virus = virus;
+  }
+  killPeople(){
+    let dead = this.infectedPopulation * this.virus.getDeathRate();
+    dead = Math.ceil(dead);
+    this.totalPopulation = this.totalPopulation - dead;
+  }
+  curePeople(){
+    this.infectedPopulation -= 500;
   }
 }
 
