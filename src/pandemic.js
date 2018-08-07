@@ -24,25 +24,29 @@ export class Virus {
 }
 
 export class Country {
-  constructor(countryName, totalPopulation, infectedPopulation, currentPopulation, growthRate, cureRate, position = [], virus = new Virus('none', 0,0,0)){
+  constructor(countryName, totalPopulation, infectedPopulation, deathPopulation, growthRate, cureRate, position = [], virus = new Virus('none', 0,0,0)){
     this.countryName = countryName;
     this.totalPopulation = totalPopulation;
     this.infectedPopulation = infectedPopulation;
-    this.currentPopulation = currentPopulation;
+    this.deathPopulation = deathPopulation;
     this.growthRate = growthRate;
     this.cureRate = cureRate;
     this.position = position;
     this.virus = virus;
   }
-  // countryTick(){
-  //   this.totalPopIncrease();
-  //   if(infectedPopulation > 0){
-  //     this.infectedPopChange();
-  //     this.killPeople();
-  //   } else {
-  //
-  //   }
-  // }
+  countryTick(){
+    const gameInterval = setInterval(() => {
+      this.totalPopIncrease();
+      if(this.infectedPopulation > 0){
+        this.infectedPopChange();
+        this.killPeople();
+      }
+      if(this.totalPopulation === 0){
+        clearInterval(gameInterval);
+      }
+    }, 1000);
+  }
+
   static createMap(countries){
     let map = [];
     for(let i = 0; i < 3; i ++){
@@ -71,7 +75,7 @@ export class Country {
     this.infectedPopulation = Math.ceil(this.infectedPopulation);
   }
   totalPopIncrease(){
-    this.totalPopulation *= 1.003;
+    this.totalPopulation *= this.growthRate;
     this.totalPopulation = Math.ceil(this.totalPopulation);
     return this.totalPopulation;
   }
@@ -81,10 +85,13 @@ export class Country {
   killPeople(){
     let dead = this.infectedPopulation * this.virus.getDeathRate();
     dead = Math.ceil(dead);
+    this.deathPopulation += dead;
     this.totalPopulation = this.totalPopulation - dead;
   }
   curePeople(){
-    this.infectedPopulation -= 500;
+    const cureInterval = setInterval(() => {
+      this.infectedPopulation -= 500;
+    }, 20000);
   }
 }
 

@@ -2,13 +2,20 @@ import { Virus } from  '../src/pandemic';
 import { Country } from  '../src/pandemic';
 
 describe('country', function(){
+  beforeEach(function() {
+    jasmine.clock().install();
+  });
+
+  afterEach(function() {
+    jasmine.clock().uninstall();
+  });
   it('should return country name', function(){
     let newCountry = new Country('Derek', 1000, 50, 3,3,3);
     expect(newCountry.countryName).toEqual('Derek');
   });
 
-  it('should return virus infect rate', function(){
-    let newCountry = new Country('brazil', 1000, 50, 3, 3, 3);
+  it('should return total population increase', function(){
+    let newCountry = new Country('brazil', 1000, 50, 20, 1.003, 3);
     expect(newCountry.totalPopIncrease()).toEqual(1003);
   });
   it('should save a virus to a country', function(){
@@ -31,13 +38,6 @@ describe('country', function(){
     newCountry.killPeople();
     expect(newCountry.totalPopulation).toEqual(998);
   });
-  it('should update the infected population', function(){
-    let newCountry = new Country('brazil', 1000, 502, 3, 3, 3);
-    let newVirus = new Virus('league', 1.005, 0.03, 3);
-    newCountry.infect(newVirus);
-    newCountry.curePeople();
-    expect(newCountry.infectedPopulation).toEqual(2);
-  });
   it('should create the map', function(){
     let country1 = new Country('brazil', 1000, 502, 3, 3, 3);
     let country2 = new Country('colombia', 1000, 502, 3, 3, 3);
@@ -54,5 +54,21 @@ describe('country', function(){
     expect(Country.createMap(theMap)).toEqual(expectedMap);
     expect(country9.position).toEqual([2,2]);
     expect(country5.infectNeighbor()).toEqual(neighborCountries);
+  });
+  it('should update population, infected population, and current population', function(){
+    let country3 = new Country('peru', 1000, 502, 1, 1.003, 3);
+    let newVirus = new Virus('league', 1.03, .003, 3);
+    country3.infect(newVirus);
+    country3.countryTick();
+    jasmine.clock().tick(3001);
+    expect(country3.totalPopulation).toEqual(1005);
+    expect(country3.infectedPopulation).toEqual(551);
+    expect(country3.deathPopulation).toEqual(7);
+  });
+  it('should cure after some time', function(){
+    let country3 = new Country('peru', 10001, 5012, 1, 1.003, 3);
+    country3.curePeople();
+    jasmine.clock().tick(60001);
+    expect(country3.infectedPopulation).toEqual(3512);
   });
 });
